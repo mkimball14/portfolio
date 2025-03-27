@@ -22,14 +22,20 @@ jobs:
     - name: Build project
       run: npm run build
       
-    - name: Install sshpass
-      run: sudo apt-get update && sudo apt-get install -y sshpass
+    - name: Setup SSH
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: 'just-a-placeholder'
+        
+    - name: Adding Known Hosts
+      run: |
+        ssh-keyscan -H gbt.3cb.myftpupload.com >> ~/.ssh/known_hosts
       
     - name: Deploy to GoDaddy
       env:
-        DEPLOY_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         DEPLOY_USER: gfBbqx1y=JpPe6
         DEPLOY_HOST: gbt.3cb.myftpupload.com
       run: |
-        echo "$DEPLOY_PASSWORD" | ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p /public_html/portfolio'
-        echo "$DEPLOY_PASSWORD" | scp -o StrictHostKeyChecking=no -r ./dist/* $DEPLOY_USER@$DEPLOY_HOST:/public_html/portfolio/
+        ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p /public_html/portfolio'
+        scp -o StrictHostKeyChecking=no -r ./dist/* $DEPLOY_USER@$DEPLOY_HOST:/public_html/portfolio/
