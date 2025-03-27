@@ -39,6 +39,29 @@ function Home() {
 
   const projects = [
     {
+      id: "crypto-sentiment",
+      title: "CLOUD & ML",
+      subtitle: "Cryptocurrency Sentiment Analysis",
+      description: "Built a cloud-based sentiment analysis service that predicts cryptocurrency market sentiment using ML models, deployed on AWS with CI/CD pipeline.",
+      image: "https://github.com/user-attachments/assets/9224d06a-fa03-4a8c-ba4b-d3c91aae1468",
+      details: {
+        overview: "Developed a web service that analyzes social media sentiment about cryptocurrencies and forecasts future sentiment trends using machine learning models.",
+        technologies: ["FastAPI", "Docker", "AWS EC2", "Machine Learning", "GitHub Actions"],
+        keyFeatures: [
+          "Sentiment analysis API endpoint",
+          "Time series forecasting model",
+          "Interactive forecast visualization",
+          "Containerized deployment",
+          "Automated CI/CD pipeline"
+        ],
+        deployment: "AWS EC2 with Docker containers",
+        links: {
+          predict: "http://ec2-35-86-159-254.us-west-2.compute.amazonaws.com:8080/predict",
+          forecast: "http://ec2-35-86-159-254.us-west-2.compute.amazonaws.com:8080/forecast_chart/7"
+        }
+      }
+    },
+    {
       id: "tableau-layoffs",
       title: "TABLEAU",
       subtitle: "U.S. Tech Layoffs",
@@ -51,6 +74,13 @@ function Home() {
       subtitle: "Marketing Dashboard",
       description: "Developed a summary of company account activity.",
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=400"
+    },
+    {
+      id: "tableau-consulting",
+      title: "TABLEAU",
+      subtitle: "Consulting Project",
+      description: "Created dashboards using scraped customer data from LinkedIn and visualized company growth by industry type and location. A/B Testing dashboards using data from Mailchimp.",
+      image: "/images/tableauconsultingproject.jpg"
     }
   ];
 
@@ -90,6 +120,8 @@ function Home() {
                   <a
                     key={index}
                     href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="p-4 bg-deep-navy rounded-2xl text-neon-cyan border border-neon-cyan hover-glow transition-all duration-300"
                     aria-label={social.label}
                   >
@@ -240,6 +272,57 @@ function Home() {
 
         <div className="neon-divider"></div>
 
+        {/* Work Experience Section */}
+        <section className="py-16 px-6">
+          <h2 className="font-orbitron text-4xl font-bold text-center mb-12 text-white glow-text">Work Experience</h2>
+          <div className="space-y-8">
+            {/* Northwestern University */}
+            <div className="bg-deep-navy rounded-2xl p-8 border border-neon-cyan/20 hover-glow transition-all duration-300">
+              <h3 className="font-orbitron text-2xl font-bold text-white">Business Intelligence Developer</h3>
+              <p className="text-neon-cyan text-lg mt-1">Northwestern University</p>
+              <div className="mt-1">
+                <span className="text-neon-cyan">10/2022 - Present</span>
+              </div>
+              <ul className="list-disc list-inside text-gray-300 space-y-2 mt-4">
+                <li>Developed advanced reports in IBM Cognos and Tableau using complex queries, data models, and Oracle SQL testing to enhance reporting and validate data integrity.</li>
+                <li>Managed Power BI licenses and workspaces, including Azure AD group administration, while troubleshooting issues for Power BI, Cognos, and Tableau Server. Researched and evaluated Microsoft Fabric for potential adoption.</li>
+                <li>Led Cognos and Tableau Server upgrades, tested AWS S3 Connector integrations, and managed Azure-based setups for OneDrive/SharePoint API.</li>
+                <li>Developed an initial Azure Function script with Python and Power Automate to scan for vulnerable passwords in SharePoint files, collaborating with developers in GitHub using VS Code and managing branches.</li>
+              </ul>
+            </div>
+
+            {/* IHDA */}
+            <div className="bg-deep-navy rounded-2xl p-8 border border-neon-cyan/20 hover-glow transition-all duration-300">
+              <h3 className="font-orbitron text-2xl font-bold text-white">Business Analyst Intern</h3>
+              <p className="text-neon-cyan text-lg mt-1">Illinois Housing Development Authority</p>
+              <div className="mt-1">
+                <span className="text-neon-cyan">06/2021 - 08/2021</span>
+              </div>
+              <ul className="list-disc list-inside text-gray-300 space-y-2 mt-4">
+                <li>Developed QA Testing Reports for rental housing application websites during both testing and production phases. Helped identify over 15 bugs and communicated with development team to fix these issues in MS SQL Server.</li>
+                <li>Identified over 500 critical vulnerabilities in the network using MS Security.</li>
+                <li>Generated Power BI reports to visualize security findings and support decision-making.</li>
+              </ul>
+            </div>
+
+            {/* USDA */}
+            <div className="bg-deep-navy rounded-2xl p-8 border border-neon-cyan/20 hover-glow transition-all duration-300">
+              <h3 className="font-orbitron text-2xl font-bold text-white">Technical Support Intern</h3>
+              <p className="text-neon-cyan text-lg mt-1">US Department of Agriculture</p>
+              <div className="mt-1">
+                <span className="text-neon-cyan">06/2019 - 08/2019</span>
+              </div>
+              <ul className="list-disc list-inside text-gray-300 space-y-2 mt-4">
+                <li>Resolved help desk tickets related to operating systems, networks, hardware, and software.</li>
+                <li>Assisted in installing uniform software packages across USDA systems.</li>
+                <li>Reimaged and maintained over 300 computers in eight weeks, ensuring operational efficiency.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <div className="neon-divider"></div>
+
         {/* Contact Section */}
         <section className="py-16 px-6 bg-black/20">
           <h2 className="font-orbitron text-4xl font-bold text-center mb-12 text-white glow-text">Contact Me</h2>
@@ -285,6 +368,8 @@ function Home() {
               <a
                 key={index}
                 href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="p-4 bg-deep-navy rounded-2xl text-neon-cyan border border-neon-cyan hover-glow transition-all duration-300"
                 aria-label={social.label}
               >
