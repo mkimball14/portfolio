@@ -39,6 +39,7 @@ jobs:
         
         echo "Preparing remote directory..."
         sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
+          cd html
           rm -rf portfolio/*
           mkdir -p portfolio
           chmod 755 portfolio
@@ -48,20 +49,25 @@ jobs:
         "
         
         echo "Copying files using tar..."
-        tar -czf - -C dist . | sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "cd portfolio && tar -xzf -"
+        tar -czf - -C dist . | sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "cd html/portfolio && tar -xzf -"
         
-        echo "Setting correct permissions..."
+        echo "Setting correct permissions and cleaning up..."
         sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
+          cd html
           find portfolio -type d -exec chmod 755 {} \;
           find portfolio -type f -exec chmod 644 {} \;
+          
+          # Remove incorrect files
+          cd portfolio/images
+          rm -f pythonlogo.html tableaudesktopspecialist.html
         "
 
         echo "Verifying deployed files..."
         sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
           echo 'Portfolio directory contents:'
-          ls -la portfolio/
+          ls -la html/portfolio/
           echo 'File permissions:'
-          ls -la portfolio/index.html || echo 'index.html not found'
+          ls -la html/portfolio/index.html || echo 'index.html not found'
           echo 'Complete directory listing:'
-          find portfolio -type f
+          find html/portfolio -type f
         "
