@@ -1,0 +1,111 @@
+MAXIMILIAN KIMBALL
+Business Intelligence Developer | Data Science & Engineering | BI Solutions
+
+maxkimball14@gmail.com
++18159313899
+https://linkedin.com/in/max-kimball
+https://maxkimball.com/portfolio
+
+Summary
+======
+Business Intelligence Developer with a master's in data science and over two and a half years of experience in BI development, specializing in IBM Cognos, Tableau, and Power BI. Skilled in data modeling, report development, and administration, with hands-on experience integrating cloud tools through AWS and Azure to enhance BI environments. Currently working and pursuing a masters in data science at Northwestern University.
+
+
+Experience
+======
+Business Intelligence Developer
+Northwestern University
+10/2022 - Ongoing
+Evanston, IL
+ - Developed advanced reports in IBM Cognos and Tableau using complex queries, data models, and Oracle SQL testing to enhance reporting and validate data integrity.
+ - Managed Power BI licenses and workspaces, including Azure AD group administration, while troubleshooting issues for Power BI, Cognos, and Tableau Server. Researched and evaluated Microsoft Fabric for potential adoption.
+ - Led Cognos and Tableau Server upgrades, tested AWS S3 Connector integrations, and managed Azure-based setups for OneDrive/SharePoint API.
+ - Developed an initial Azure Function script with Python and Power Automate to scan for vulnerable passwords in SharePoint files, collaborating with developers in GitHub using VS Code and managing branches.
+
+Business Analyst Intern
+Illinois Housing Development Authority
+06/2021 - 08/2021
+Chicago, IL
+ - Developed QA Testing Reports for rental housing application websites during both testing and production phases. Helped identify over 15 bugs and communicated with development team to fix these issues in MS SQL Server.
+ - Identified over 500 critical vulnerabilities in the network using MS Security.
+ - Generated Power BI reports to visualize security findings and support decision-making.
+
+Technical Support Intern
+US Department of Agriculture
+06/2019 - 08/2019
+Peoria, IL
+ - Resolved help desk tickets related to operating systems, networks, hardware, and software.
+ - Assisted in installing uniform software packages across USDA systems.
+ - Reimaged and maintained over 300 computers in eight weeks, ensuring operational efficiency.
+
+
+Education
+======
+Masters of Science in Data Science
+4.0
+Northwestern University
+01/2025 - Ongoing
+Evanston, IL
+ - Pursuing Advanced Data Science Certificate with a focus in Data Engineering/Cloud Engineering
+
+Master of Science in Business Analytics
+3.6
+University of Illinois
+08/2021 - 05/2022
+Urbana-Champaign, IL
+ - Focus in Data Science and Cloud Computing/Data Engineering
+
+Bachelor of Science in Management Information Systems
+Bradley University
+08/2016 - 05/2020
+Peoria, IL
+ - Minor in Cybersecurity
+
+
+Skills
+======
+Languages
+ - R (caret
+ - dplyr
+ - ggplot2
+ - etc)
+ - Python (pandas
+ - matplotlib
+ - scikit-learn
+ - etc.)
+ - Oracle SQL
+ - MySQL
+ - NoSQL
+ - Java
+
+Tools
+ - Tableau
+ - IBM Cognos
+ - PowerBI
+ - MS Excel
+ - SQL Developer
+ - Pentaho
+ - Google Colab
+ - Jupyter Notebook
+ - Jira
+ - Git
+
+Cloud Computing
+ - Azure (AD
+ - Functions
+ - API)
+ - AWS (S3
+ - EC2
+ - Redshift
+ - DynamoDB)
+ - PySpark
+ - MongoDB
+ - GitHub
+ - CI/CD
+
+
+Courses & Certificates
+======
+Tableau Desktop Specialist
+Certified in data connections, field & chart types, dashboards, data preparation, advanced calculations, etc
+
