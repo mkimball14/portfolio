@@ -22,13 +22,22 @@ jobs:
     - name: Build project
       run: npm run build
       
-    - name: Deploy to GoDaddy via SFTP
-      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-      with:
-        server: gbt.3cb.myftpupload.com
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        port: 22
-        local_path: './dist/*'
-        remote_path: '/public_html/portfolio/'
-        sftp_only: true
+    - name: Install sshpass
+      run: sudo apt-get install sshpass
+      
+    - name: Create remote directory and deploy
+      env:
+        SSHPASS: ${{ secrets.FTP_PASSWORD }}
+      run: |
+        # First create the directory
+        sshpass -e sftp -o StrictHostKeyChecking=no ${{ secrets.FTP_USERNAME }}@gbt.3cb.myftpupload.com << EOF
+        mkdir -p /public_html/portfolio
+        quit
+        EOF
+        
+        # Then upload the files
+        sshpass -e sftp -o StrictHostKeyChecking=no ${{ secrets.FTP_USERNAME }}@gbt.3cb.myftpupload.com << EOF
+        cd /public_html/portfolio
+        put -r ./dist/*
+        quit
+        EOF
