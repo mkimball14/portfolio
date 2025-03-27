@@ -22,8 +22,10 @@ jobs:
     - name: Build project
       run: npm run build
       
-    - name: Install sshpass
-      run: sudo apt-get update && sudo apt-get install -y sshpass
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sshpass rsync
       
     - name: Deploy to GoDaddy
       env:
@@ -31,19 +33,17 @@ jobs:
         DEPLOY_HOST: gbt.3cb.myftpupload.com
         DEPLOY_PASSWORD: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
-        # Store the home directory path
-        HOME_DIR=$(sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST 'pwd')
-        echo "Home directory is: $HOME_DIR"
+        echo "Verifying build directory..."
+        pwd
+        ls -la dist/
         
         echo "Creating and verifying portfolio directory..."
         sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
           cd public_html
           mkdir -p portfolio
           pwd
-          ls -la
-          echo 'Portfolio directory contents:'
           ls -la portfolio
         "
         
-        echo "Copying files..."
-        cd dist && sshpass -p "$DEPLOY_PASSWORD" scp -o StrictHostKeyChecking=no -r ./* "$DEPLOY_USER@$DEPLOY_HOST:public_html/portfolio/"
+        echo "Copying files using rsync..."
+        sshpass -p "$DEPLOY_PASSWORD" rsync -av --progress -e "ssh -o StrictHostKeyChecking=no" dist/ $DEPLOY_USER@$DEPLOY_HOST:public_html/portfolio/
