@@ -28,6 +28,8 @@ jobs:
     - name: Deploy to GoDaddy
       env:
         DEPLOY_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        DEPLOY_USER: gfBbqx1y=JpPe6
+        DEPLOY_HOST: gbt.3cb.myftpupload.com
       run: |
-        echo "$DEPLOY_PASSWORD" | ssh -o StrictHostKeyChecking=no gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com 'mkdir -p /public_html/portfolio'
-        echo "$DEPLOY_PASSWORD" | scp -o StrictHostKeyChecking=no -r ./dist/* gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com:/public_html/portfolio/
+        echo "$DEPLOY_PASSWORD" | ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p /public_html/portfolio'
+        echo "$DEPLOY_PASSWORD" | scp -o StrictHostKeyChecking=no -r ./dist/* $DEPLOY_USER@$DEPLOY_HOST:/public_html/portfolio/
