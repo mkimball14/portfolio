@@ -27,6 +27,9 @@ jobs:
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
+        chmod 700 ~/.ssh
+        ls -la ~/.ssh
+        cat ~/.ssh/id_rsa | head -n 1
         ssh-keyscan -H gbt.3cb.myftpupload.com >> ~/.ssh/known_hosts
       
     - name: Deploy to GoDaddy
@@ -34,5 +37,5 @@ jobs:
         DEPLOY_USER: ${{ secrets.SSH_USERNAME }}
         DEPLOY_HOST: gbt.3cb.myftpupload.com
       run: |
-        ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p /public_html/portfolio'
-        scp -o StrictHostKeyChecking=no -r ./dist/* $DEPLOY_USER@$DEPLOY_HOST:/public_html/portfolio/
+        ssh -v -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p /public_html/portfolio'
+        scp -v -o StrictHostKeyChecking=no -r ./dist/* $DEPLOY_USER@$DEPLOY_HOST:/public_html/portfolio/
