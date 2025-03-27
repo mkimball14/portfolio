@@ -7,8 +7,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      SSHPASS: ${{ secrets.SSH_PASSWORD }}
     
     steps:
     - uses: actions/checkout@v3
@@ -28,9 +26,6 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y sshpass
       
     - name: Deploy to GoDaddy
-      env:
-        SSHPASS: ${{ secrets.SSH_PASSWORD }}
       run: |
-        export SSHPASS="${{ secrets.SSH_PASSWORD }}"
-        sshpass -e ssh -o StrictHostKeyChecking=no gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com 'mkdir -p /public_html/portfolio'
-        sshpass -e scp -o StrictHostKeyChecking=no -r ./dist/* gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com:/public_html/portfolio/
+        sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com 'mkdir -p /public_html/portfolio'
+        sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no -r ./dist/* gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com:/public_html/portfolio/
