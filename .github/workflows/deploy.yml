@@ -35,3 +35,8 @@ jobs:
       run: |
         mkdir -p ~/.ssh
         rsync -avz --delete ./dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/public_html/portfolio/
+
+    - name: Commit and push changes
+      run: |
+        git commit -m 'Test deployment via SSH - Add timestamp'
+        git push origin main
