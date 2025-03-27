@@ -60,6 +60,13 @@ jobs:
           # Remove incorrect files
           cd portfolio/images
           rm -f pythonlogo.html tableaudesktopspecialist.html
+          
+          # Add cache-busting timestamp to index.html
+          cd ..
+          if [ -f index.html ]; then
+            TIMESTAMP=\$(date +%s)
+            sed -i \"s|</head>|<meta name=\\\"timestamp\\\" content=\\\"\${TIMESTAMP}\\\"></head>|\" index.html
+          fi
         "
 
         echo "Verifying deployed files..."
