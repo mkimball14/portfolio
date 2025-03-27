@@ -37,23 +37,22 @@ jobs:
         pwd
         ls -la dist/
         
-        echo "Creating and verifying portfolio directory..."
+        echo "Preparing remote directory..."
         sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
+          rm -rf portfolio/*
           mkdir -p portfolio
+          chmod 755 portfolio
+          echo 'Current directory structure:'
           pwd
-          ls -la portfolio
+          ls -la
         "
         
-        echo "Copying files using scp..."
-        cd dist
-        for file in $(ls); do
-          echo "Copying $file..."
-          sshpass -p "$DEPLOY_PASSWORD" scp -o StrictHostKeyChecking=no -r "$file" "$DEPLOY_USER@$DEPLOY_HOST:portfolio/"
-        done
-
+        echo "Copying files using tar..."
+        tar -czf - -C dist . | sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "cd portfolio && tar -xzf -"
+        
         echo "Setting correct permissions..."
         sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
-          chmod -R 755 portfolio
+          find portfolio -type d -exec chmod 755 {} \;
           find portfolio -type f -exec chmod 644 {} \;
         "
 
@@ -62,7 +61,7 @@ jobs:
           echo 'Portfolio directory contents:'
           ls -la portfolio/
           echo 'File permissions:'
-          stat portfolio/index.html
-          echo 'Directory structure:'
-          tree portfolio/ || ls -R portfolio/
+          ls -la portfolio/index.html || echo 'index.html not found'
+          echo 'Complete directory listing:'
+          find portfolio -type f
         "
