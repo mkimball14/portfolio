@@ -46,4 +46,4 @@ jobs:
         "
         
         echo "Copying files..."
-        sshpass -p "$DEPLOY_PASSWORD" scp -o StrictHostKeyChecking=no -r ./dist/* "$DEPLOY_USER@$DEPLOY_HOST:public_html/portfolio/"
+        cd dist && sshpass -p "$DEPLOY_PASSWORD" scp -o StrictHostKeyChecking=no -r ./* "$DEPLOY_USER@$DEPLOY_HOST:public_html/portfolio/"
