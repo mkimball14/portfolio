@@ -2,20 +2,19 @@ name: Deploy to GoDaddy
 
 on:
   push:
-    branches: [ main ]  # Change to your default branch if different (e.g., master)
+    branches: [ main ]  # or master, depending on your default branch
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
+    - uses: actions/checkout@v3
+    
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 16
+        node-version: 20  # Use Node.js 20 instead of older versions
         
     - name: Install dependencies
       run: npm ci
@@ -26,7 +25,7 @@ jobs:
     - name: Deploy to GoDaddy
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        server: ${{ secrets.FTP_SERVER }}
+        server: gbt.3cb.myftpupload.com
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./dist/
