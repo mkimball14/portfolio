@@ -22,12 +22,16 @@ jobs:
     - name: Build project
       run: npm run build
       
-    - name: Deploy to GoDaddy via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+    - name: Setup SSH
+      uses: shimataro/ssh-key-action@v2
       with:
-        server: gbt.3cb.myftpupload.com
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftps  # Try FTPS protocol
-        local-dir: ./dist/
-        server-dir: /public_html/portfolio/
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: 'just-a-placeholder'
+        
+    - name: Adding Known Hosts
+      run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      
+    - name: Deploy with rsync
+      run: |
+        mkdir -p ~/.ssh
+        rsync -avz --delete ./dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/public_html/portfolio/
