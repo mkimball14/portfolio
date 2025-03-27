@@ -7,6 +7,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      SSHPASS: ${{ secrets.SSH_PASSWORD }}
     
     steps:
     - uses: actions/checkout@v3
@@ -25,13 +27,10 @@ jobs:
     - name: Install sshpass
       run: sudo apt-get update && sudo apt-get install -y sshpass
       
-    - name: Create portfolio directory
-      run: sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh -o StrictHostKeyChecking=no gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com 'mkdir -p /public_html/portfolio'
-      
-    - name: Deploy with scp
-      run: sshpass -p '${{ secrets.SSH_PASSWORD }}' scp -o StrictHostKeyChecking=no -r ./dist/* gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com:/public_html/portfolio/
-
-    - name: Commit and push changes
+    - name: Deploy to GoDaddy
+      env:
+        SSHPASS: ${{ secrets.SSH_PASSWORD }}
       run: |
-        git commit -m 'Test deployment via SSH - Add timestamp'
-        git push origin main
+        export SSHPASS="${{ secrets.SSH_PASSWORD }}"
+        sshpass -e ssh -o StrictHostKeyChecking=no gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com 'mkdir -p /public_html/portfolio'
+        sshpass -e scp -o StrictHostKeyChecking=no -r ./dist/* gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com:/public_html/portfolio/
