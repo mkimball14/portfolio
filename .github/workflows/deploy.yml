@@ -31,11 +31,8 @@ jobs:
         DEPLOY_HOST: gbt.3cb.myftpupload.com
         DEPLOY_PASSWORD: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
-        echo "Checking current directory..."
-        sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST 'pwd && ls -la'
-        
         echo "Creating portfolio directory..."
-        sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p public_html/portfolio && ls -la public_html'
+        sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST 'cd public_html && mkdir -p portfolio'
         
         echo "Copying files..."
         sshpass -p "$DEPLOY_PASSWORD" scp -o StrictHostKeyChecking=no -r ./dist/* $DEPLOY_USER@$DEPLOY_HOST:public_html/portfolio/
