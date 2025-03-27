@@ -50,3 +50,19 @@ jobs:
           echo "Copying $file..."
           sshpass -p "$DEPLOY_PASSWORD" scp -o StrictHostKeyChecking=no -r "$file" "$DEPLOY_USER@$DEPLOY_HOST:portfolio/"
         done
+
+        echo "Setting correct permissions..."
+        sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
+          chmod -R 755 portfolio
+          find portfolio -type f -exec chmod 644 {} \;
+        "
+
+        echo "Verifying deployed files..."
+        sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "
+          echo 'Portfolio directory contents:'
+          ls -la portfolio/
+          echo 'File permissions:'
+          stat portfolio/index.html
+          echo 'Directory structure:'
+          tree portfolio/ || ls -R portfolio/
+        "
