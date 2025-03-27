@@ -22,20 +22,14 @@ jobs:
     - name: Build project
       run: npm run build
       
-    - name: Setup SSH
-      uses: shimataro/ssh-key-action@v2
-      with:
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        known_hosts: 'just-a-placeholder'
-        
-    - name: Adding Known Hosts
-      run: |
-        ssh-keyscan -H gbt.3cb.myftpupload.com >> ~/.ssh/known_hosts
+    - name: Install sshpass
+      run: sudo apt-get update && sudo apt-get install -y sshpass
       
-    - name: Deploy with rsync
-      run: |
-        mkdir -p ~/.ssh
-        rsync -avz --delete ./dist/ gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com:/public_html/portfolio/
+    - name: Create portfolio directory
+      run: sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh -o StrictHostKeyChecking=no gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com 'mkdir -p /public_html/portfolio'
+      
+    - name: Deploy with scp
+      run: sshpass -p '${{ secrets.SSH_PASSWORD }}' scp -o StrictHostKeyChecking=no -r ./dist/* gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com:/public_html/portfolio/
 
     - name: Commit and push changes
       run: |
