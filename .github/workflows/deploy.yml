@@ -2,7 +2,7 @@ name: Deploy to GoDaddy
 
 on:
   push:
-    branches: [ main ]  # or master, depending on your default branch
+    branches: [main]
 
 jobs:
   build-and-deploy:
@@ -14,7 +14,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 20  # Use Node.js 20 instead of older versions
+        node-version: 20
         
     - name: Install dependencies
       run: npm ci
@@ -29,12 +29,13 @@ jobs:
         known_hosts: 'just-a-placeholder'
         
     - name: Adding Known Hosts
-      run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      run: |
+        ssh-keyscan -H gbt.3cb.myftpupload.com >> ~/.ssh/known_hosts
       
     - name: Deploy with rsync
       run: |
         mkdir -p ~/.ssh
-        rsync -avz --delete ./dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/public_html/portfolio/
+        rsync -avz --delete ./dist/ gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com:/public_html/portfolio/
 
     - name: Commit and push changes
       run: |
