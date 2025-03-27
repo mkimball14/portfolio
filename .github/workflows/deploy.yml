@@ -22,26 +22,14 @@ jobs:
     - name: Build project
       run: npm run build
       
-    - name: Setup SSH
-      run: |
-        mkdir -p ~/.ssh
-        printf "%s\n" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        chmod 700 ~/.ssh
-        echo "SSH directory contents:"
-        ls -la ~/.ssh
-        echo "First line of key file:"
-        cat ~/.ssh/id_rsa | head -n 1
-        echo "Last line of key file:"
-        cat ~/.ssh/id_rsa | tail -n 1
-        echo "Key file permissions:"
-        ls -l ~/.ssh/id_rsa
-        ssh-keyscan -H gbt.3cb.myftpupload.com >> ~/.ssh/known_hosts
+    - name: Install sshpass
+      run: sudo apt-get update && sudo apt-get install -y sshpass
       
     - name: Deploy to GoDaddy
       env:
-        DEPLOY_USER: ${{ secrets.SSH_USERNAME }}
+        DEPLOY_USER: gfBbqx1y=JpPe6
         DEPLOY_HOST: gbt.3cb.myftpupload.com
+        DEPLOY_PASSWORD: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
-        ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p /public_html/portfolio'
-        scp -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -r ./dist/* $DEPLOY_USER@$DEPLOY_HOST:/public_html/portfolio/
+        sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST 'mkdir -p /public_html/portfolio'
+        sshpass -p "$DEPLOY_PASSWORD" scp -o StrictHostKeyChecking=no -r ./dist/* $DEPLOY_USER@$DEPLOY_HOST:/public_html/portfolio/
