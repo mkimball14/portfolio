@@ -1,6 +1,22 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronDown, Github, Linkedin, Mail, ArrowLeft } from 'lucide-react';
+import { ChevronDown, Github, Linkedin, Mail, ArrowLeft, Maximize, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+declare global {
+  interface Window {
+    tableau: {
+      Viz: new (container: HTMLElement, url: string, options: {
+        hideTabs?: boolean;
+        hideToolbar?: boolean;
+        width?: string;
+        height?: string;
+        onFirstInteractive?: () => void;
+        onError?: () => void;
+      }) => any;
+    };
+  }
+}
 
 interface ProjectLinks {
   predict: string;
@@ -133,45 +149,11 @@ const projects: Project[] = [
     }
   },
   {
-    id: "tableau-layoffs",
-    title: "TABLEAU",
-    subtitle: "U.S. Tech Layoffs",
-    description: "Dynamic analysis of tech layoffs in the US during Jan 2022 - Jan 2023.",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200",
-    details: {
-      overview: "Created an interactive dashboard to analyze and visualize the impact of layoffs in the tech industry.",
-      technologies: ["Tableau", "Data Analysis", "Data Visualization"],
-      keyFeatures: [
-        "Interactive filters",
-        "Industry breakdown",
-        "Temporal analysis",
-        "Company comparisons"
-      ]
-    }
-  },
-  {
-    id: "marketing-dashboard",
-    title: "TABLEAU",
-    subtitle: "Marketing Dashboard",
-    description: "Developed a summary of company account activity.",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200",
-    details: {
-      overview: "Created a comprehensive marketing analytics dashboard to track and analyze account activity.",
-      technologies: ["Tableau", "Marketing Analytics", "Data Visualization"],
-      keyFeatures: [
-        "Account activity tracking",
-        "Performance metrics",
-        "Trend analysis",
-        "ROI calculations"
-      ]
-    }
-  },
-  {
     id: "tableau-consulting",
     title: "TABLEAU",
     subtitle: "Consulting Project",
     description: "Created dashboards using scraped customer data from LinkedIn and visualized company growth by industry type and location.",
-    image: "/images/tableauconsultingproject.jpg",
+    image: "/portfolio/images/tableauconsultingproject.jpg",
     details: {
       overview: "Developed an interactive geographic visualization dashboard for a consulting client that displays customer growth by industry and location. This project involved data scraping from LinkedIn, data cleaning, and creating A/B testing dashboards using Mailchimp campaign data to optimize customer outreach strategies. I joined scraped LinkedIn data with Mailchimp campaign metrics and existing company CRM data to create a comprehensive view of customer engagement across regions.",
       technologies: ["Tableau", "Data Scraping", "Geographic Visualization", "A/B Testing", "Mailchimp API", "Data Cleaning", "Python", "Data Integration"],
@@ -224,328 +206,144 @@ function isTableauConsultingProject(details: CryptoProjectDetails | TableauProje
   return 'dataInsights' in details || 'methodology' in details;
 }
 
-function TableauDashboard() {
+function TableauDashboard({ vizId, title }: { vizId: string; title: string }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [iframeHeight, setIframeHeight] = useState(800);
   
+  // Set iframe height based on container width for responsiveness
   useEffect(() => {
-    // Create a script element
-    const script = document.createElement('script');
-    script.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-    script.async = true;
-    
-    // Add the script to the document
-    document.body.appendChild(script);
-    
-    // Setup the Tableau visualization after the script loads
-    script.onload = () => {
+    const updateHeight = () => {
       if (containerRef.current) {
-        const vizElement = containerRef.current.querySelector('.tableauViz') as HTMLElement;
-        
-        if (vizElement) {
-          const width = containerRef.current.offsetWidth;
-          
-          // Set responsive styles
-          if (width > 800) {
-            vizElement.style.width = '100%';
-            vizElement.style.height = '800px';
-          } else if (width > 500) {
-            vizElement.style.width = '100%';
-            vizElement.style.height = '700px';
-          } else {
-            vizElement.style.width = '100%';
-            vizElement.style.height = '600px';
-          }
-        }
+        const width = containerRef.current.offsetWidth;
+        // For mobile screens, use a taller aspect ratio
+        // For narrow screens (mobile), use a taller aspect ratio to improve visibility
+        const aspectRatio = width < 640 ? 1.5 : 0.75; // taller on mobile, wider on desktop
+        setIframeHeight(width * aspectRatio);
       }
     };
     
-    // Cleanup function to remove script when component unmounts
-    return () => {
-      if (script.parentNode) {
-        document.body.removeChild(script);
-      }
-    };
+    // Initial height calculation
+    updateHeight();
+    
+    // Update height on window resize
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
   }, []);
   
-  return (
-    <div ref={containerRef} className="rounded-xl overflow-hidden border border-neon-cyan/20 hover-glow transition-all duration-300">
-      <div className='tableauPlaceholder' id='viz1743042347348' style={{position: 'relative', width: '100%', height: '800px'}}>
-        <noscript>
-          <a href='#'>
-            <img alt='Industry Distribution Dashboard' src='https://public.tableau.com/static/images/YC/YC4JKYG3S/1_rss.png' style={{border: 'none'}} />
-          </a>
-        </noscript>
-        <object className='tableauViz' style={{display:'none'}}>
-          <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-          <param name='embed_code_version' value='3' />
-          <param name='path' value='shared&#47;YC4JKYG3S' />
-          <param name='toolbar' value='yes' />
-          <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;YC&#47;YC4JKYG3S&#47;1.png' />
-          <param name='animate_transition' value='yes' />
-          <param name='display_static_image' value='yes' />
-          <param name='display_spinner' value='yes' />
-          <param name='display_overlay' value='yes' />
-          <param name='display_count' value='yes' />
-          <param name='language' value='en-US' />
-        </object>
-      </div>
-    </div>
-  );
-}
+  // Handle different Tableau URL formats
+  let iframeUrl;
+  if (vizId.startsWith('http')) {
+    // It's a full URL
+    iframeUrl = vizId;
+  } else if (vizId.includes('shared/')) {
+    // Shared link format
+    const sharedId = vizId.split('shared/')[1].split('?')[0];
+    iframeUrl = `https://public.tableau.com/shared/${sharedId}?:embed=y&:showVizHome=no`;
+  } else if (vizId.includes('/')) {
+    // Standard workbook/view format
+    iframeUrl = `https://public.tableau.com/views/${vizId}?:showVizHome=no&:embed=true&:toolbar=yes&:display_count=yes&:showVizHome=no`;
+  } else {
+    // Just a viz ID without workbook - could be a story or dashboard
+    iframeUrl = `https://public.tableau.com/shared/${vizId}?:embed=y&:showVizHome=no`;
+  }
+  
+  const handleLoad = () => {
+    setIsLoading(false);
+  };
+  
+  const handleError = () => {
+    setError('Failed to load dashboard');
+    setIsLoading(false);
+  };
 
-function TableauABTestingDashboard() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+    // Prevent scrolling on body when modal is open
+    if (!isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  };
+
+  // Clean up body style when component unmounts
   useEffect(() => {
-    // Create a script element
-    const script = document.createElement('script');
-    script.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-    script.async = true;
-    
-    // Add the script to the document
-    document.body.appendChild(script);
-    
-    // Setup the Tableau visualization after the script loads
-    script.onload = () => {
-      if (containerRef.current) {
-        const vizElement = containerRef.current.querySelector('.tableauViz') as HTMLElement;
-        
-        if (vizElement) {
-          const width = containerRef.current.offsetWidth;
-          
-          // Set responsive styles
-          if (width > 800) {
-            vizElement.style.width = '100%';
-            vizElement.style.height = '800px';
-          } else if (width > 500) {
-            vizElement.style.width = '100%';
-            vizElement.style.height = '700px';
-          } else {
-            vizElement.style.width = '100%';
-            vizElement.style.height = '600px';
-          }
-        }
-      }
-    };
-    
-    // Cleanup function to remove script when component unmounts
     return () => {
-      if (script.parentNode) {
-        document.body.removeChild(script);
-      }
+      document.body.style.overflow = '';
     };
   }, []);
-  
+
   return (
-    <div ref={containerRef} className="rounded-xl overflow-hidden border border-neon-cyan/20 hover-glow transition-all duration-300">
-      <div className='tableauPlaceholder' id='viz1743042548360' style={{position: 'relative', width: '100%', height: '800px'}}>
-        <noscript>
-          <a href='#'>
-            <img alt='A/B Testing Dashboard' src='https://public.tableau.com/static/images/JH/JHWYCNGQH/1_rss.png' style={{border: 'none'}} />
-          </a>
-        </noscript>
-        <object className='tableauViz' style={{display:'none'}}>
-          <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-          <param name='embed_code_version' value='3' />
-          <param name='path' value='shared&#47;JHWYCNGQH' />
-          <param name='toolbar' value='yes' />
-          <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;JH&#47;JHWYCNGQH&#47;1.png' />
-          <param name='animate_transition' value='yes' />
-          <param name='display_static_image' value='yes' />
-          <param name='display_spinner' value='yes' />
-          <param name='display_overlay' value='yes' />
-          <param name='display_count' value='yes' />
-          <param name='language' value='en-US' />
-        </object>
+    <div className="relative">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-deep-navy/50 z-10">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-neon-cyan"></div>
+        </div>
+      )}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-deep-navy/50 z-10">
+          <p className="text-red-500">{error}</p>
+        </div>
+      )}
+      <div ref={containerRef} className="w-full min-h-[400px] bg-deep-navy rounded-2xl p-4 border border-neon-cyan/20 hover-glow transition-all duration-300 relative">
+        <button 
+          onClick={toggleFullscreen}
+          className="absolute top-4 right-4 z-20 bg-neon-cyan/90 text-deep-navy p-2 rounded-full hover:bg-neon-cyan transition-all duration-200"
+          aria-label="Toggle fullscreen"
+        >
+          <Maximize size={16} />
+        </button>
+        
+        <iframe 
+          src={iframeUrl}
+          style={{ border: 'none', width: '100%', height: `${iframeHeight}px` }}
+          title={title}
+          onLoad={handleLoad}
+          onError={handleError}
+          allow="fullscreen"
+        />
       </div>
+
+      {/* Fullscreen Modal */}
+      {isFullscreen && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-2 sm:p-4">
+          <div className="w-full h-full max-w-[98vw] max-h-[98vh] sm:max-w-[95vw] sm:max-h-[95vh] bg-deep-navy rounded-xl p-2 sm:p-4 relative">
+            <button 
+              onClick={toggleFullscreen}
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 bg-neon-cyan/90 text-deep-navy p-2 rounded-full hover:bg-neon-cyan transition-all duration-200"
+              aria-label="Close fullscreen"
+            >
+              <X size={20} />
+            </button>
+            
+            <h2 className="text-white text-lg sm:text-xl mb-2 sm:mb-4 font-orbitron">{title}</h2>
+            
+            <div className="w-full h-[calc(100%-40px)] sm:h-[calc(100%-60px)]">
+              <iframe 
+                src={iframeUrl}
+                style={{ border: 'none', width: '100%', height: '100%' }}
+                title={`${title} (Fullscreen)`}
+                allow="fullscreen"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function TableauPerformanceDashboard() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    // Create a script element
-    const script = document.createElement('script');
-    script.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-    script.async = true;
-    
-    // Add the script to the document
-    document.body.appendChild(script);
-    
-    // Setup the Tableau visualization after the script loads
-    script.onload = () => {
-      if (containerRef.current) {
-        const vizElement = containerRef.current.querySelector('.tableauViz') as HTMLElement;
-        
-        if (vizElement) {
-          const width = containerRef.current.offsetWidth;
-          
-          // Set responsive styles
-          if (width > 800) {
-            vizElement.style.width = '100%';
-            vizElement.style.height = '800px';
-          } else if (width > 500) {
-            vizElement.style.width = '100%';
-            vizElement.style.height = '700px';
-          } else {
-            vizElement.style.width = '100%';
-            vizElement.style.height = '600px';
-          }
-        }
-      }
-    };
-    
-    // Cleanup function to remove script when component unmounts
-    return () => {
-      if (script.parentNode) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-  
-  return (
-    <div ref={containerRef} className="rounded-xl overflow-hidden border border-neon-cyan/20 hover-glow transition-all duration-300">
-      <div className='tableauPlaceholder' id='viz1743042780677' style={{position: 'relative', width: '100%', height: '800px'}}>
-        <noscript>
-          <a href='#'>
-            <img alt='Performance Dashboard' src='https://public.tableau.com/static/images/HB/HB3388M57/1_rss.png' style={{border: 'none'}} />
-          </a>
-        </noscript>
-        <object className='tableauViz' style={{display:'none'}}>
-          <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-          <param name='embed_code_version' value='3' />
-          <param name='path' value='shared&#47;HB3388M57' />
-          <param name='toolbar' value='yes' />
-          <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;HB&#47;HB3388M57&#47;1.png' />
-          <param name='animate_transition' value='yes' />
-          <param name='display_static_image' value='yes' />
-          <param name='display_spinner' value='yes' />
-          <param name='display_overlay' value='yes' />
-          <param name='display_count' value='yes' />
-          <param name='language' value='en-US' />
-        </object>
-      </div>
-    </div>
-  );
-}
-
-function TableauGrowthDashboard() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    // Create a script element
-    const script = document.createElement('script');
-    script.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-    script.async = true;
-    
-    // Add the script to the document
-    document.body.appendChild(script);
-    
-    // Setup the Tableau visualization after the script loads
-    script.onload = () => {
-      if (containerRef.current) {
-        const vizElement = containerRef.current.querySelector('.tableauViz') as HTMLElement;
-        
-        if (vizElement) {
-          const width = containerRef.current.offsetWidth;
-          vizElement.style.width = '100%';
-          vizElement.style.height = `${width * 0.75}px`;
-        }
-      }
-    };
-    
-    // Cleanup function to remove script when component unmounts
-    return () => {
-      if (script.parentNode) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-  
-  return (
-    <div ref={containerRef} className="rounded-xl overflow-hidden border border-neon-cyan/20 hover-glow transition-all duration-300">
-      <div className='tableauPlaceholder' id='viz1743042898126' style={{position: 'relative', width: '100%', height: '600px'}}>
-        <noscript>
-          <a href='#'>
-            <img alt='Growth Trends Dashboard' src='https://public.tableau.com/static/images/NR/NRF6X4RTN/1_rss.png' style={{border: 'none'}} />
-          </a>
-        </noscript>
-        <object className='tableauViz' style={{display:'none'}}>
-          <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-          <param name='embed_code_version' value='3' />
-          <param name='path' value='shared&#47;NRF6X4RTN' />
-          <param name='toolbar' value='yes' />
-          <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;NR&#47;NRF6X4RTN&#47;1.png' />
-          <param name='animate_transition' value='yes' />
-          <param name='display_static_image' value='yes' />
-          <param name='display_spinner' value='yes' />
-          <param name='display_overlay' value='yes' />
-          <param name='display_count' value='yes' />
-          <param name='language' value='en-US' />
-        </object>
-      </div>
-    </div>
-  );
+  // Using actual dashboard URL provided by the user with shared format
+  return <TableauDashboard vizId="5HQMWGJT7" title="Opens/Clicks by Region" />;
 }
 
 function TableauStoryDashboard() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    // Create a script element
-    const script = document.createElement('script');
-    script.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-    script.async = true;
-    
-    // Add the script to the document
-    document.body.appendChild(script);
-    
-    // Setup the Tableau visualization after the script loads
-    script.onload = () => {
-      if (containerRef.current) {
-        const vizElement = containerRef.current.querySelector('.tableauViz') as HTMLElement;
-        
-        if (vizElement) {
-          vizElement.style.width = '100%';
-          vizElement.style.height = '800px';
-        }
-      }
-    };
-    
-    // Cleanup function to remove script when component unmounts
-    return () => {
-      if (script.parentNode) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-  
-  return (
-    <div ref={containerRef} className="rounded-xl overflow-hidden border border-neon-cyan/20 hover-glow transition-all duration-300">
-      <div className='tableauPlaceholder' id='viz1743043021491' style={{position: 'relative', width: '100%', height: '800px'}}>
-        <noscript>
-          <a href='#'>
-            <img alt='Project Story Dashboard' src='https://public.tableau.com/static/images/RC/RCCTPFX9H/1_rss.png' style={{border: 'none'}} />
-          </a>
-        </noscript>
-        <object className='tableauViz' style={{display:'none'}}>
-          <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-          <param name='embed_code_version' value='3' />
-          <param name='path' value='shared&#47;RCCTPFX9H' />
-          <param name='toolbar' value='yes' />
-          <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;RC&#47;RCCTPFX9H&#47;1.png' />
-          <param name='animate_transition' value='yes' />
-          <param name='display_static_image' value='yes' />
-          <param name='display_spinner' value='yes' />
-          <param name='display_overlay' value='yes' />
-          <param name='display_count' value='yes' />
-          <param name='language' value='en-US' />
-        </object>
-      </div>
-    </div>
-  );
+  // Using Tableau's sample dashboard as a placeholder
+  return <TableauDashboard vizId="Superstore_embedded_800x800/Overview" title="Project Story Dashboard" />;
 }
 
 function ProjectDetails() {
@@ -578,7 +376,7 @@ function ProjectDetails() {
 
   return (
     <div className="min-h-screen bg-charcoal py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-deep-navy rounded-2xl card-glow overflow-hidden">
+      <div className="max-w-6xl mx-auto bg-deep-navy rounded-2xl card-glow overflow-hidden">
         <div className="p-8">
           <Link 
             to="/" 
@@ -741,27 +539,12 @@ function ProjectDetails() {
               <>
                 <div className="mb-12">
                   <h2 className="font-orbitron text-2xl text-white mb-4">Open/Click Rate Dashboard</h2>
-                  <TableauDashboard />
-                </div>
-                
-                <div className="mb-12">
-                  <h2 className="font-orbitron text-2xl text-white mb-4">Unsubscribe Rate Dashboard</h2>
-                  <TableauABTestingDashboard />
+                  <TableauDashboard vizId="CustomerBehaviorABTestDashboard/ABTestDashboardOpens" title="Open/Click Rate Dashboard" />
                 </div>
                 
                 <div className="mb-12">
                   <h2 className="font-orbitron text-2xl text-white mb-4">Opens/Clicks by Region</h2>
                   <TableauPerformanceDashboard />
-                </div>
-                
-                <div className="mb-12">
-                  <h2 className="font-orbitron text-2xl text-white mb-4">Company Growth Details</h2>
-                  <TableauGrowthDashboard />
-                </div>
-                
-                <div className="mb-12">
-                  <h2 className="font-orbitron text-2xl text-white mb-4">Industry Distribution Dashboard</h2>
-                  <TableauStoryDashboard />
                 </div>
                 
                 {project.details.methodology && (
@@ -774,7 +557,7 @@ function ProjectDetails() {
                     </ul>
                   </div>
                 )}
-                
+
                 {project.details.clientImpact && (
                   <div>
                     <h2 className="font-orbitron text-2xl text-white mb-4">Client Impact</h2>
@@ -785,7 +568,7 @@ function ProjectDetails() {
                     </ul>
                   </div>
                 )}
-                
+
                 {project.details.dataInsights && (
                   <div>
                     <h2 className="font-orbitron text-2xl text-white mb-4">Key Data Insights</h2>
@@ -796,7 +579,7 @@ function ProjectDetails() {
                     </ul>
                   </div>
                 )}
-                
+
                 {project.details.challenges && (
                   <div>
                     <h2 className="font-orbitron text-2xl text-white mb-4">Challenges & Solutions</h2>
