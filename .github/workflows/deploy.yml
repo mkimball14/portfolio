@@ -26,6 +26,8 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y sshpass
       
     - name: Deploy to GoDaddy
+      env:
+        DEPLOY_PASSWORD: ${{ secrets.SSH_PASSWORD }}
       run: |
-        sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com 'mkdir -p /public_html/portfolio'
-        sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no -r ./dist/* gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com:/public_html/portfolio/
+        echo "$DEPLOY_PASSWORD" | ssh -o StrictHostKeyChecking=no gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com 'mkdir -p /public_html/portfolio'
+        echo "$DEPLOY_PASSWORD" | scp -o StrictHostKeyChecking=no -r ./dist/* gfBbqx1y=JpPe6@gbt.3cb.myftpupload.com:/public_html/portfolio/
