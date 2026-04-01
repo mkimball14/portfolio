@@ -46,41 +46,15 @@ function Home() {
       description: "End-to-end Medallion Architecture pipeline on Microsoft Fabric with a Direct Lake semantic model and Power BI dashboard analyzing GLP-1 drug costs and clinical outcomes.",
       image: "/images/glp1/Executive Summary.jpg",
       details: {
-        overview: "GLP-1 medications like Ozempic and Wegovy are dominating healthcare spending. Employers are seeing drug costs spike with no clear picture of whether those costs are actually improving patient health. I wanted to build something that went beyond a basic cost report and actually asked: are Value-Based Care providers delivering better clinical outcomes per dollar spent, or are we just paying more for the same results? I set up a Microsoft business account specifically for this project, activated a Fabric trial capacity, and built the whole thing end to end from a blank workspace.",
-        technologies: ["Microsoft Fabric", "Power BI", "PySpark", "Delta Lake", "Python", "DAX", "TMDL", "Fabric REST API"],
+        overview: "GLP-1 medications like Ozempic, Wegovy, and Mounjaro are dominating healthcare spending conversations right now. Employers are seeing drug costs spike with no clear picture of whether those costs are actually improving patient health. I wanted to build something that went beyond a basic cost report and actually asked: are Value-Based Care providers delivering better clinical outcomes per dollar spent, or are we just paying more for the same results? I set up a Microsoft business account specifically for this project, activated a Fabric trial capacity, and built the whole thing end to end. No pre-existing infrastructure, no template to start from.",
+        technologies: ["Microsoft Fabric (F2 trial)", "Power BI", "PySpark", "Delta Lake", "Python", "DAX", "TMDL", "Fabric REST API"],
         keyFeatures: [
-          "Full Medallion Architecture pipeline on OneLake",
-          "Direct Lake semantic model deployed via TMDL",
-          "7 DAX measures including calculated iterators",
-          "Row-level security based on UserPrincipalName",
-          "Comprehensive 4-page Power BI dashboard"
-        ],
-        architecture: {
-          title: "Medallion Architecture",
-          description: "I structured the lakehouse in three layers rather than dumping CSVs directly into Power BI. Medallion gives each layer a single job.",
-          flow: "CSV Files -> Bronze (raw copy) -> Silver (cleansed) -> Gold (star schema) -> Semantic Model -> Dashboard"
-        },
-        challenges: [
-          "Trial capacity throttling: Fabric capacity hit HTTP 430 errors after failed notebook runs. Fixed by manually cancelling zombie sessions and switching to REST API-based execution.",
-          "TMDL vs model.bim: Direct Lake works differently, requiring TMDL for semantic model version control instead of standard JSON.",
-          "Columns showing as measures: Fixed implicit measures by adding `summarizeBy: none` to each column definition in the TMDL and redeploying via the endpoint."
-        ],
-        futureIdeas: [
-          "Incremental loads with Delta MERGE instead of full overwrites.",
-          "A proper Dim_Date table for DAX time intelligence functions.",
-          "CI/CD for deployments using GitHub Actions.",
-          "HIPAA controls for real data, including Microsoft BAA and column-level encryption."
-        ],
-        powerbi: {
-          url: "https://app.powerbi.com/reportEmbed?reportId=51d901a7-edba-4bc3-aa31-892cf50c6002&autoAuth=true&ctid=8daf98aa-8f0c-4908-9f64-8c35a67d3f62"
-        },
-        images: [
-          { src: "/images/glp1/Executive Summary.jpg", caption: "Executive Summary" },
-          { src: "/images/glp1/GLP-1 Drug Analysis.jpg", caption: "GLP-1 Drug Analysis" },
-          { src: "/images/glp1/Provider Performance.jpg", caption: "Provider Performance" },
-          { src: "/images/glp1/Clinical Outcomes.jpg", caption: "Clinical Outcomes" },
-          { src: "/images/glp1/FabricWorkspace.jpg", caption: "Fabric Workspace" },
-          { src: "/images/glp1/SemanticModel.jpg", caption: "Semantic Model" }
+          "Full Medallion Architecture pipeline (Bronze/Silver/Gold) on OneLake",
+          "Direct Lake semantic model deployed programmatically via Fabric REST API using TMDL",
+          "Star schema with 7 DAX measures including calculated iterators",
+          "Row-level security with USERPRINCIPALNAME() filtering",
+          "4-page Power BI dashboard: Executive KPIs, Drug Analysis, Provider Performance, Clinical Outcomes",
+          "8,000 claims, 200 providers, 5 specialties, 5 regions, 3 years of data (2022–2024), 7 GLP-1 drugs"
         ]
       }
     },

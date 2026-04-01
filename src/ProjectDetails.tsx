@@ -72,13 +72,22 @@ interface PowerBIProjectDetails extends BaseProjectDetails {
     title: string;
     description: string;
     flow: string;
+    layers?: { name: string; description: string }[];
   };
+  dataModeling?: {
+    description: string;
+    measures?: { name: string; description: string; dax?: string }[];
+    rls?: string;
+  };
+  dashboardWalkthrough?: { page: string; description: string; image?: string }[];
+  copilotProblem?: string;
   challenges?: string[];
   futureIdeas?: string[];
   powerbi?: {
     url: string;
   };
   images?: { src: string; caption: string }[];
+  disclaimer?: string;
 }
 
 interface Project {
@@ -104,30 +113,75 @@ const projects: Project[] = [
     description: "End-to-end Medallion Architecture pipeline on Microsoft Fabric with a Direct Lake semantic model and Power BI dashboard analyzing GLP-1 drug costs and clinical outcomes.",
     image: "/images/glp1/Executive Summary.jpg",
     details: {
-      overview: "GLP-1 medications like Ozempic and Wegovy are dominating healthcare spending. Employers are seeing drug costs spike with no clear picture of whether those costs are actually improving patient health. I wanted to build something that went beyond a basic cost report and actually asked: are Value-Based Care providers delivering better clinical outcomes per dollar spent, or are we just paying more for the same results? I set up a Microsoft business account specifically for this project, activated a Fabric trial capacity, and built the whole thing end to end from a blank workspace.",
-      technologies: ["Microsoft Fabric", "Power BI", "PySpark", "Delta Lake", "Python", "DAX", "TMDL", "Fabric REST API"],
+      overview: "GLP-1 medications like Ozempic, Wegovy, and Mounjaro are dominating healthcare spending conversations right now. Employers are seeing drug costs spike with no clear picture of whether those costs are actually improving patient health. I wanted to build something that went beyond a basic cost report and actually asked: are Value-Based Care providers delivering better clinical outcomes per dollar spent, or are we just paying more for the same results? I set up a Microsoft business account specifically for this project, activated a Fabric trial capacity, and built the whole thing end to end. No pre-existing infrastructure, no template to start from.",
+      technologies: ["Microsoft Fabric (F2 trial)", "Power BI", "PySpark", "Delta Lake", "Python", "DAX", "TMDL", "Fabric REST API"],
       keyFeatures: [
-        "Full Medallion Architecture pipeline on OneLake",
-        "Direct Lake semantic model deployed via TMDL",
-        "7 DAX measures including calculated iterators",
-        "Row-level security based on UserPrincipalName",
-        "Comprehensive 4-page Power BI dashboard"
+        "Full Medallion Architecture pipeline (Bronze/Silver/Gold) on OneLake",
+        "Direct Lake semantic model deployed programmatically via Fabric REST API using TMDL",
+        "Star schema with 7 DAX measures including calculated iterators",
+        "Row-level security with USERPRINCIPALNAME() filtering",
+        "4-page Power BI dashboard: Executive KPIs, Drug Analysis, Provider Performance, Clinical Outcomes",
+        "8,000 claims, 200 providers, 5 specialties, 5 regions, 3 years of data (2022–2024), 7 GLP-1 drugs"
       ],
       architecture: {
         title: "Medallion Architecture",
-        description: "I structured the lakehouse in three layers rather than dumping CSVs directly into Power BI. Medallion gives each layer a single job.",
-        flow: "CSV Files -> Bronze (raw copy) -> Silver (cleansed) -> Gold (star schema) -> Semantic Model -> Dashboard"
+        description: "I structured the lakehouse in three layers rather than dumping CSVs directly into Power BI. When you build a flat pipeline, every transformation is tangled with every other one. If the source changes format, you're rewriting everything. Medallion gives each layer a single job.",
+        flow: "CSV Files → Bronze (raw copy) → Silver (cleansed) → Gold (star schema) → Semantic Model → Dashboard",
+        layers: [
+          { name: "Bronze", description: "Exact copy of the source with two added metadata columns: _ingested_at and _source_file. No transformations. If anything breaks downstream, I can rebuild from Bronze without re-ingesting the raw files." },
+          { name: "Silver", description: "Standardized column names, enforced data types, removed duplicates, and added surrogate keys. Each Silver table maps 1:1 to a Bronze table but is clean enough for analytics." },
+          { name: "Gold", description: "Star schema with Fact_Claims at the center and four dimension tables: Dim_Patient, Dim_Provider, Dim_Drug, and Dim_Date. The Gold layer is what the semantic model reads from via Direct Lake." }
+        ]
       },
+      dataModeling: {
+        description: "One-direction cross-filtering throughout. Filters flow from dimensions into the fact table. Bi-directional creates ambiguous filter paths and should only be used for bridge tables in many-to-many relationships.",
+        measures: [
+          {
+            name: "Total GLP-1 Cost",
+            description: "Uses CALCULATE to apply a filter regardless of what slicers are active. Only pharmacy claims count toward GLP-1 spend.",
+            dax: "Total GLP-1 Cost = CALCULATE(SUM(Fact_Claims[TotalPaidAmt]), Fact_Claims[ClaimType] = \"Pharmacy\")"
+          },
+          {
+            name: "Avg Claim Cost per Provider",
+            description: "Uses AVERAGEX, which is an iterator. This is meaningfully different from AVERAGE(Fact_Claims[TotalPaidAmt]). The simple AVERAGE would average individual claim rows. AVERAGEX computes total cost per provider first, then averages those totals across providers. The CALCULATE inside the iterator does a context transition, converting the row context into a filter context so the SUM works correctly for each provider. The result across 200 providers came out to $68K average.",
+            dax: "Avg Claim Cost per Provider = AVERAGEX(VALUES(Dim_Provider[ProviderKey]), CALCULATE(SUM(Fact_Claims[TotalPaidAmt])))"
+          }
+        ],
+        rls: "Row-level security is set up with USERPRINCIPALNAME() filtering Dim_Provider. When a provider logs in, their email matches their ProviderID record, and that filter propagates through the relationship into Fact_Claims. They only see their own data with no application-level code needed."
+      },
+      dashboardWalkthrough: [
+        {
+          page: "Executive Summary",
+          description: "Leads with the four metrics that matter: 8,000 total claims, $12.5M in GLP-1 drug spend, 2.7% year-over-year cost growth, and 90 VBC providers in the network. The clustered column chart by Region and CareModel shows FFS providers consistently outspending VBC across every region. The West has the biggest gap at $1.79M FFS vs $1.40M VBC. The donut at the bottom right shows the claim mix: 62.5% pharmacy, 37.5% medical.",
+          image: "/images/glp1/Executive Summary.jpg"
+        },
+        {
+          page: "GLP-1 Drug Analysis",
+          description: "Breaks down where the $12.5M is actually going. Saxenda is the single most expensive drug at $2.41M despite not being the highest-volume brand — that's a unit cost issue worth investigating. The treemap groups by generic compound and shows semaglutide leading at $5.32M combined across Ozempic, Wegovy, and Rybelsus. The line chart with a 6-month forecast shows steady growth from $4.07M in 2022 to $4.27M in 2024, with the trend continuing upward.",
+          image: "/images/glp1/GLP-1 Drug Analysis.jpg"
+        },
+        {
+          page: "Provider Performance",
+          description: "Answers who is driving cost at the individual level. Christopher Smith is at the top at $134K in GLP-1 claims. The detail table lets you slice by specialty, region, and care model to find prescribing outliers quickly.",
+          image: "/images/glp1/Provider Performance.jpg"
+        },
+        {
+          page: "Clinical Outcomes",
+          description: "The most interesting page. The scatter plot and column chart compare average BMI change by care model. FFS providers are actually showing slightly better BMI outcomes at -3.60 vs VBC at -2.81. In a real dataset that finding would lead to a lot of follow-up questions about whether VBC savings are coming from care coordination and referral patterns rather than prescribing behavior. That's exactly the kind of thing this dashboard is designed to surface.",
+          image: "/images/glp1/Clinical Outcomes.jpg"
+        }
+      ],
+      copilotProblem: "One thing I originally planned was a Self-Service page using Power BI's AI visuals: Smart Narrative for auto-generated cost summaries, Key Influencers to analyze what drives GLP-1 spend, and the Q&A natural language interface. When I got into it I found that Copilot and most of the AI-powered visuals require a paid Fabric capacity, not the trial. The trial doesn't give you the permissions to enable Copilot at the workspace level. I cut the Self-Service page rather than build a watered-down version of it. In a production environment with a paid F2 or F4 capacity those features would add real value for non-technical stakeholders who want to ask questions in plain English.",
       challenges: [
-        "Trial capacity throttling: Fabric capacity hit HTTP 430 errors after failed notebook runs. Fixed by manually cancelling zombie sessions and switching to REST API-based execution.",
-        "TMDL vs model.bim: Direct Lake works differently, requiring TMDL for semantic model version control instead of standard JSON.",
-        "Columns showing as measures: Fixed implicit measures by adding `summarizeBy: none` to each column definition in the TMDL and redeploying via the endpoint."
+        "Trial capacity throttling: After a couple of failed notebook runs the Fabric capacity hit HTTP 430 errors and stopped accepting new sessions. The fix was opening the Monitoring Hub, manually cancelling the zombie sessions that were still listed as In Progress even though they'd disconnected, and waiting for the cooldown period. Switching to REST API-based execution instead of the browser notebook UI made this much less frequent.",
+        "TMDL vs model.bim: I expected to deploy the semantic model using standard JSON format like you would for an Analysis Services model. The error 'Import from JSON supported for V3 models only' was the first indication that Direct Lake works differently. TMDL is less documented than model.bim but turned out to be worth learning since it's how Fabric expects semantic models to be version-controlled going forward.",
+        "Columns showing as measures: After deploying the model, every numeric and date column in the Fields pane had the sigma icon, meaning Power BI was treating them as implicit measures rather than columns. The fix was adding summarizeBy: none to each column definition in the TMDL and redeploying via the updateDefinition endpoint."
       ],
       futureIdeas: [
-        "Incremental loads with Delta MERGE instead of full overwrites.",
-        "A proper Dim_Date table for DAX time intelligence functions.",
-        "CI/CD for deployments using GitHub Actions.",
-        "HIPAA controls for real data, including Microsoft BAA and column-level encryption."
+        "Incremental loads with Delta MERGE: Everything currently runs as a full overwrite. For tables with millions of rows you'd use Delta's merge capability to apply only changed records.",
+        "A proper Dim_Date table: I built year, quarter, and month as integer columns with an explicit hierarchy. A dedicated date dimension would unlock DAX time intelligence functions like DATEADD and SAMEPERIODLASTYEAR for more flexible period comparisons.",
+        "CI/CD for deployments: The notebook uploads and semantic model deployments are Python scripts I run manually. In production these would live in a GitHub Actions workflow that triggers on merge, using the same Fabric REST API calls.",
+        "HIPAA controls for real data: This project used synthetic data generated with Python's Faker library. Real claims data would need a Microsoft BAA, column-level encryption on PHI fields, audit logging on all lakehouse access, and RLS tied to actual Entra ID identities rather than synthetic ProviderIDs."
       ],
       powerbi: {
         url: "https://app.powerbi.com/reportEmbed?reportId=51d901a7-edba-4bc3-aa31-892cf50c6002&autoAuth=true&ctid=8daf98aa-8f0c-4908-9f64-8c35a67d3f62"
@@ -139,7 +193,8 @@ const projects: Project[] = [
         { src: "/images/glp1/Clinical Outcomes.jpg", caption: "Clinical Outcomes" },
         { src: "/images/glp1/FabricWorkspace.jpg", caption: "Fabric Workspace" },
         { src: "/images/glp1/SemanticModel.jpg", caption: "Semantic Model" }
-      ]
+      ],
+      disclaimer: "All data in this project is fully synthetic. No real patient or provider information was used at any point."
     }
   },
   {
@@ -476,77 +531,6 @@ function TableauDashboard({ vizId, title }: { vizId: string; title: string }) {
                 title={`${title} (Fullscreen)`}
                 allow="fullscreen"
               />
-              {isPowerBIProject(project.details) && (
-                <>
-                  {project.details.powerbi && (
-                    <div className="mb-12">
-                      <h2 className="font-orbitron text-2xl text-white mb-4">Interactive Dashboard</h2>
-                      <div className="w-full bg-deep-navy/50 rounded-xl overflow-hidden border border-neon-cyan/20">
-                        <iframe 
-                          title="Power BI Dashboard" 
-                          width="100%" 
-                          height="800" 
-                          src={project.details.powerbi.url} 
-                          frameBorder="0" 
-                          allowFullScreen={true}>
-                        </iframe>
-                      </div>
-                    </div>
-                  )}
-
-                  {project.details.architecture && (
-                    <div className="mb-12">
-                      <h2 className="font-orbitron text-2xl text-white mb-4">{project.details.architecture.title}</h2>
-                      <p className="text-gray-300 mb-4">{project.details.architecture.description}</p>
-                      <div className="bg-deep-navy p-6 rounded-xl border border-neon-cyan/20">
-                        <code className="text-neon-cyan block overflow-x-auto whitespace-pre">
-                          {project.details.architecture.flow}
-                        </code>
-                      </div>
-                    </div>
-                  )}
-
-                  {project.details.challenges && (
-                    <div className="mb-12">
-                      <h2 className="font-orbitron text-2xl text-white mb-4">Technical Challenges</h2>
-                      <ul className="list-disc list-inside space-y-2 text-gray-300">
-                        {project.details.challenges.map((challenge, index) => (
-                          <li key={index}>{challenge}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {project.details.futureIdeas && (
-                    <div className="mb-12">
-                      <h2 className="font-orbitron text-2xl text-white mb-4">Future Production Enhancements</h2>
-                      <ul className="list-disc list-inside space-y-2 text-gray-300">
-                        {project.details.futureIdeas.map((idea, index) => (
-                          <li key={index}>{idea}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {project.details.images && project.details.images.length > 0 && (
-                    <div className="mb-12">
-                      <h2 className="font-orbitron text-2xl text-white mb-6">Project Artifacts & Visuals</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {project.details.images.map((img, index) => (
-                          <div key={index} className="flex flex-col">
-                            <img
-                              src={img.src}
-                              alt={img.caption}
-                              className="w-full rounded-xl border border-neon-cyan/20 hover-glow transition-all duration-300 mb-2"
-                            />
-                            <p className="text-center text-neon-cyan font-orbitron text-sm">{img.caption}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
             </div>
           </div>
         </div>
@@ -656,6 +640,153 @@ function ProjectDetails() {
                   ))}
                 </ul>
               </div>
+            )}
+
+            {isPowerBIProject(project.details) && (
+              <>
+                {project.details.powerbi && (
+                  <div>
+                    <h2 className="font-orbitron text-2xl text-white mb-4">Interactive Dashboard</h2>
+                    <div className="w-full bg-deep-navy/50 rounded-xl overflow-hidden border border-neon-cyan/20">
+                      <iframe
+                        title="Power BI Dashboard"
+                        width="100%"
+                        height="800"
+                        src={project.details.powerbi.url}
+                        frameBorder="0"
+                        allowFullScreen={true}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {project.details.architecture && (
+                  <div>
+                    <h2 className="font-orbitron text-2xl text-white mb-4">{project.details.architecture.title}</h2>
+                    <p className="text-gray-300 mb-4">{project.details.architecture.description}</p>
+                    <div className="bg-deep-navy/50 p-6 rounded-xl border border-neon-cyan/20 mb-6">
+                      <code className="text-neon-cyan block text-center text-lg">
+                        {project.details.architecture.flow}
+                      </code>
+                    </div>
+                    {project.details.architecture.layers && (
+                      <div className="space-y-4">
+                        {project.details.architecture.layers.map((layer, index) => (
+                          <div key={index} className="bg-deep-navy/50 p-4 rounded-xl border border-neon-cyan/20">
+                            <h3 className="font-orbitron text-lg text-neon-cyan mb-2">{layer.name}</h3>
+                            <p className="text-gray-300">{layer.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {project.details.dataModeling && (
+                  <div>
+                    <h2 className="font-orbitron text-2xl text-white mb-4">Data Modeling</h2>
+                    <p className="text-gray-300 mb-6">{project.details.dataModeling.description}</p>
+
+                    {project.details.dataModeling.measures && project.details.dataModeling.measures.length > 0 && (
+                      <div className="space-y-6 mb-6">
+                        <h3 className="font-orbitron text-xl text-white">Key DAX Measures</h3>
+                        {project.details.dataModeling.measures.map((measure, index) => (
+                          <div key={index} className="bg-deep-navy/50 p-4 rounded-xl border border-neon-cyan/20">
+                            <h4 className="font-orbitron text-lg text-neon-cyan mb-2">{measure.name}</h4>
+                            <p className="text-gray-300 mb-3">{measure.description}</p>
+                            {measure.dax && (
+                              <pre className="bg-black/40 p-4 rounded-lg overflow-x-auto">
+                                <code className="text-neon-cyan text-sm font-mono">{measure.dax}</code>
+                              </pre>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {project.details.dataModeling.rls && (
+                      <div className="bg-deep-navy/50 p-4 rounded-xl border border-neon-cyan/20">
+                        <h3 className="font-orbitron text-lg text-neon-cyan mb-2">Row-Level Security</h3>
+                        <p className="text-gray-300">{project.details.dataModeling.rls}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {project.details.dashboardWalkthrough && project.details.dashboardWalkthrough.length > 0 && (
+                  <div>
+                    <h2 className="font-orbitron text-2xl text-white mb-6">Dashboard Walkthrough</h2>
+                    <div className="space-y-8">
+                      {project.details.dashboardWalkthrough.map((page, index) => (
+                        <div key={index} className="bg-deep-navy/50 p-6 rounded-xl border border-neon-cyan/20">
+                          <h3 className="font-orbitron text-xl text-neon-cyan mb-3">{page.page}</h3>
+                          <p className="text-gray-300 mb-4">{page.description}</p>
+                          {page.image && (
+                            <img
+                              src={page.image}
+                              alt={page.page}
+                              className="w-full rounded-xl border border-neon-cyan/20 hover-glow transition-all duration-300"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {project.details.copilotProblem && (
+                  <div>
+                    <h2 className="font-orbitron text-2xl text-white mb-4">The Copilot Problem</h2>
+                    <p className="text-gray-300 leading-relaxed">{project.details.copilotProblem}</p>
+                  </div>
+                )}
+
+                {project.details.challenges && (
+                  <div>
+                    <h2 className="font-orbitron text-2xl text-white mb-4">Challenges I Actually Hit</h2>
+                    <ul className="list-disc list-inside space-y-3 text-gray-300">
+                      {project.details.challenges.map((challenge, index) => (
+                        <li key={index}>{challenge}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {project.details.futureIdeas && (
+                  <div>
+                    <h2 className="font-orbitron text-2xl text-white mb-4">What I'd Do Differently in Production</h2>
+                    <ul className="list-disc list-inside space-y-3 text-gray-300">
+                      {project.details.futureIdeas.map((idea, index) => (
+                        <li key={index}>{idea}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {project.details.images && project.details.images.length > 0 && (
+                  <div>
+                    <h2 className="font-orbitron text-2xl text-white mb-6">Infrastructure</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {project.details.images.filter(img => img.caption === 'Fabric Workspace' || img.caption === 'Semantic Model').map((img, index) => (
+                        <div key={index} className="flex flex-col">
+                          <img
+                            src={img.src}
+                            alt={img.caption}
+                            className="w-full rounded-xl border border-neon-cyan/20 hover-glow transition-all duration-300 mb-2"
+                          />
+                          <p className="text-center text-neon-cyan font-orbitron text-sm">{img.caption}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {project.details.disclaimer && (
+                  <div className="bg-deep-navy/50 p-4 rounded-xl border border-neon-cyan/20 text-center">
+                    <p className="text-gray-400 italic">{project.details.disclaimer}</p>
+                  </div>
+                )}
+              </>
             )}
 
             {isCryptoProject(project.details) && (
