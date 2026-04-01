@@ -1,0 +1,15 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/resume",
+      "destination": "https://drive.google.com/file/d/1XAlMCZ6Z8SLPVGlScioc9chuQ_IC3nw2/view?usp=sharing",
+      "permanent": true
+    }
+  ]
+}
