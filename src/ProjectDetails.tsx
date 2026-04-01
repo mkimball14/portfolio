@@ -645,17 +645,17 @@ function ProjectDetails() {
             {isPowerBIProject(project.details) && (
               <>
                 {project.details.powerbi && (
-                  <div style={{ margin: '0 -2rem' }}>
-                    <h2 className="font-orbitron text-2xl text-white mb-4" style={{ paddingLeft: '2rem' }}>Interactive Dashboard</h2>
-                    <div className="bg-deep-navy/50 rounded-xl overflow-hidden border border-neon-cyan/20">
+                  <div>
+                    <h2 className="font-orbitron text-2xl text-white mb-4">Interactive Dashboard</h2>
+                    <div className="flex justify-center">
                       <iframe
                         title="GLP-1 Value-Based Care Dashboard"
-                        width="100%"
-                        height="900"
+                        width="1024"
+                        height="804"
                         src={project.details.powerbi.url}
                         frameBorder="0"
                         allowFullScreen={true}
-                        style={{ border: 'none', display: 'block' }}
+                        style={{ border: 'none', maxWidth: '100%' }}
                       />
                     </div>
                   </div>
