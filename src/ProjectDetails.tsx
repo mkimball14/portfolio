@@ -647,15 +647,20 @@ function ProjectDetails() {
                 {project.details.powerbi && (
                   <div>
                     <h2 className="font-orbitron text-2xl text-white mb-4">Interactive Dashboard</h2>
-                    <div className="flex justify-center">
+                    <div className="w-full rounded-xl overflow-hidden border border-neon-cyan/20" style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
                       <iframe
                         title="GLP-1 Value-Based Care Dashboard"
-                        width="1024"
-                        height="804"
                         src={project.details.powerbi.url}
                         frameBorder="0"
                         allowFullScreen={true}
-                        style={{ border: 'none', maxWidth: '100%' }}
+                        style={{
+                          border: 'none',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                        }}
                       />
                     </div>
                   </div>
