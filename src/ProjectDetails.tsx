@@ -184,7 +184,7 @@ const projects: Project[] = [
         "HIPAA controls for real data: This project used synthetic data generated with Python's Faker library. Real claims data would need a Microsoft BAA, column-level encryption on PHI fields, audit logging on all lakehouse access, and RLS tied to actual Entra ID identities rather than synthetic ProviderIDs."
       ],
       powerbi: {
-        url: "https://app.powerbi.com/reportEmbed?reportId=51d901a7-edba-4bc3-aa31-892cf50c6002&autoAuth=true&ctid=8daf98aa-8f0c-4908-9f64-8c35a67d3f62"
+        url: "https://app.powerbi.com/view?r=eyJrIjoiNTA2Y2I0OGEtYzI5ZS00YTUwLWEzZDctODRiOTZlZDVlODFlIiwidCI6IjhkYWY5OGFhLThmMGMtNDkwOC05ZjY0LThjMzVhNjdkM2Y2MiJ9"
       },
       images: [
         { src: "/images/glp1/Executive Summary.jpg", caption: "Executive Summary" },
@@ -651,7 +651,7 @@ function ProjectDetails() {
                       <iframe
                         title="Power BI Dashboard"
                         width="100%"
-                        height="800"
+                        height="804"
                         src={project.details.powerbi.url}
                         frameBorder="0"
                         allowFullScreen={true}
