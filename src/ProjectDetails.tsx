@@ -544,9 +544,24 @@ function TableauDashboard({ vizId, title }: { vizId: string; title: string }) {
 function ProjectDetails() {
   const { id } = useParams();
   const project = projects.find(p => p.id === id);
+  const pbiContainerRef = useRef<HTMLDivElement>(null);
+  const [pbiScale, setPbiScale] = useState(1);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    const el = pbiContainerRef.current;
+    if (!el) return;
+    const updateScale = () => {
+      const width = el.offsetWidth;
+      setPbiScale(Math.min(width / 1280, 1));
+    };
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const socialIcons = [
@@ -647,7 +662,7 @@ function ProjectDetails() {
                 {project.details.powerbi && (
                   <div>
                     <h2 className="font-orbitron text-2xl text-white mb-4">Interactive Dashboard</h2>
-                    <div className="w-full rounded-xl overflow-hidden border border-neon-cyan/20" style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
+                    <div ref={pbiContainerRef} className="w-full rounded-xl overflow-hidden border border-neon-cyan/20" style={{ height: `${720 * pbiScale}px` }}>
                       <iframe
                         title="GLP-1 Value-Based Care Dashboard"
                         src={project.details.powerbi.url}
@@ -655,11 +670,10 @@ function ProjectDetails() {
                         allowFullScreen={true}
                         style={{
                           border: 'none',
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
+                          width: '1280px',
+                          height: '720px',
+                          transform: `scale(${pbiScale})`,
+                          transformOrigin: 'top left',
                         }}
                       />
                     </div>
